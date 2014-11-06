@@ -8,6 +8,8 @@ log_header = ['user_id', 'access_mode_id', 'logic_area_name', 'lac',
               'site_name', 'site_channel_name', 'cont_app_id',
               'cont_classify_id', 'cont_type_id', 'acce_url']
 
+clean_log_header = log_header[:] + ['location', 'day', 'hour']
+
 call_headers = ['user_id', 'target_id', 'start_time',
                 'end_time', 'roam', 'basename',
                 'longitude', 'latitude']
@@ -63,3 +65,5 @@ db['production'] = {
     'charset': 'utf8',
     'db': 'beijingmobile_sample0x'
 }
+
+BAIDU_MAP_AK = '5feeb91553679e8baa2c5439e5fc0e75'
