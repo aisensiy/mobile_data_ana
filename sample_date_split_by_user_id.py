@@ -9,14 +9,10 @@ import shutil
 import os
 import glob
 import logging
+from common import create_dir_if_not_exists
 
 logging.basicConfig(format='%(asctime)s-[%(levelname)s]: %(message)s',
                     level=logging.INFO)
-
-
-def create_dir_if_not_exists(dst_dir):
-    if not os.path.isdir(dst_dir):
-        os.mkdir(dst_dir)
 
 
 def copy_dir(src_dir, dst_dir):
