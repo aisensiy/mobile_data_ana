@@ -21,17 +21,25 @@ def create_dir_if_not_exists(dst_dir):
 
 def copy_dir(src_dir, dst_dir):
     create_dir_if_not_exists(dst_dir)
-    for idx, csv_file in enumerate(glob.glob(os.path.join(src_dir, '*.csv'))):
+    csv_files = glob.glob(os.path.join(src_dir, '*.csv'))
+    for idx, csv_file in enumerate(csv_files):
         if idx % 50 == 0 and idx != 0:
             logging.info('Already %d files from %s => %s',
                          idx, src_dir, dst_dir)
         shutil.copy(csv_file, dst_dir)
 
 
+def copy_dir_by_sys(src_dir, dst_dir):
+    os.system("cp -rf %s %s" % (src_dir, dst_dir))
+
+
 def main(src_dir, dst_dir, start, end):
     create_dir_if_not_exists(dst_dir)
     for subdir in ["%02d" % num for num in range(start, end + 1)]:
-        copy_dir(os.path.join(src_dir, subdir), os.path.join(dst_dir, subdir))
+        from_dir = os.path.join(src_dir, subdir)
+        to_dir = os.path.join(dst_dir, subdir)
+        logging.info("copy %s to %s", from_dir, to_dir)
+        copy_dir_by_sys(from_dir, to_dir)
 
 
 if __name__ == '__main__':
