@@ -32,7 +32,7 @@ def clean_data(filepath, dst_filepath, header):
         for row in csvreader:
             origin_len += 1
             if row[latitude_idx] == '' or row[longitude_idx] == '' or row[start_time_idx] == '':
-                return
+                continue
             cleaned_len += 1
             row[latitude_idx] = '%.5f' % float(row[latitude_idx])
             row[longitude_idx] = '%.5f' % float(row[longitude_idx])
