@@ -44,14 +44,15 @@ def get_tags(data):
         tags = []
         for poi in data['result']['pois']:
             tags.append(poi['poiType'])
-        counter = Counter(tags).most_common(3)
-        return ",".join([tag for tag, count in counter]).encode('utf8')
+        return ",".join(tags).encode('utf8')
     except:
         return ""
 
 
 def main(src, dst):
     df = pd.read_csv(src, header=None)
+    df['location'] = df[0].map(
+        lambda x: '%.3f %.4f' % tuple(reversed(map(float, x.split(' ')))))
     df['json'] = df[1].map(lambda x: json.loads(x))
     df['street'] = df['json'].map(get_street)
     df['business'] = df['json'].map(get_business)
@@ -59,6 +60,7 @@ def main(src, dst):
     df['distinct'] = df['json'].map(get_distinct)
     df['tags'] = df['json'].map(get_tags)
     del df['json']
+    del df[0]
     df.to_csv(dst, index=None, header=None)
 
 
