@@ -97,14 +97,18 @@ def per_file(filepath, dstfilepath, dstdir, uid, speed_thresh):
     write_invalid_points(dstdir, uid, invalid_locations)
 
 
-def main(src_dir, dst_dir, speed_thresh):
+def main(src_dir, dst_dir, valid_user_file, speed_thresh):
     files = glob.glob(os.path.join(src_dir, '*', '*.csv'))
     total_file_cnt = len(files)
+    valid_users = set(map(lambda x: x.strip(),
+                          open(valid_user_file).readlines()))
 
     for cnt, csvfile in enumerate(files):
         logging.info('[%d/%d] processing: %s costs: %s',
                      cnt + 1, total_file_cnt, csvfile, costs())
         uid = os.path.splitext(os.path.basename(csvfile))[0]
+        if uid not in valid_users:
+            continue
         dstdir = os.path.join(dst_dir, uid[-2:])
         create_dir_if_not_exists(dstdir)
         dstfile = os.path.join(dstdir, uid + '.csv')
@@ -119,6 +123,6 @@ if __name__ == '__main__':
     dst_dir = "%s-no-invalidpoint" % src_dir
     speed_thresh = int(sys.argv[2]) if len(sys.argv) >= 3 else 300
     create_dir_if_not_exists(dst_dir)
-    main(src_dir, dst_dir, speed_thresh)
+    main(src_dir, dst_dir, 'valid_users.csv', speed_thresh)
     end_at = datetime.now()
     delta = end_at - start_at
