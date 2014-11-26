@@ -10,6 +10,8 @@ log_header = ['user_id', 'access_mode_id', 'logic_area_name', 'lac',
 
 clean_log_header = log_header[:] + ['location', 'day', 'hour']
 
+noinvalid_clean_log_header = clean_log_header[:] + ['duration', 'distance', 'speed']
+
 call_headers = ['user_id', 'target_id', 'start_time',
                 'end_time', 'roam', 'basename',
                 'longitude', 'latitude']
