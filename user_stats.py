@@ -3,7 +3,6 @@
 
 import pandas as pd
 from constants import noinvalid_clean_log_header as cols
-from common import prepare_dataframe
 import os
 import glob
 import logging
@@ -24,6 +23,8 @@ def costs():
 
 
 def location_and_app_stat(filepath, columns):
+    if len(open(filepath).readlines()) == 0:
+        return
     df = pd.read_csv(filepath, header=None, names=columns)
     avg_cnt_per_day = df.groupby('day').size().mean()
     cnt_of_day = df.day.nunique()
