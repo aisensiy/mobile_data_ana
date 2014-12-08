@@ -57,8 +57,8 @@ def clean_data(filepath, header):
             row[latitude_idx] = '%.5f' % float(row[latitude_idx])
             row[longitude_idx] = '%.5f' % float(row[longitude_idx])
             row.append(row[latitude_idx] + ' ' + row[longitude_idx])
+            row.append(row[start_time_idx][6:8])
             row.append(row[start_time_idx][8:10])
-            row.append(row[start_time_idx][10:12])
 
             output.append(row)
 
