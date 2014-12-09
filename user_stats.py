@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import pandas as pd
-from constants import noinvalid_clean_log_header as cols
+from constants import clean_log_header as cols
 import os
 import glob
 import logging
@@ -28,6 +28,7 @@ def location_and_app_stat(filepath, columns):
     df = pd.read_csv(filepath, header=None, names=columns)
     avg_cnt_per_day = df.groupby('day').size().mean()
     cnt_of_day = df.day.nunique()
+    cnt_of_hour = df.hour.nunique()
     cnt_of_app = df.busi_name.nunique()
     avg_app_per_day = df.groupby('day') \
         .agg({'busi_name': lambda x: x.nunique()})['busi_name'].mean()
@@ -40,6 +41,7 @@ def location_and_app_stat(filepath, columns):
         'req_cnt': [len(df)],
         'request_avg_per_day': [avg_cnt_per_day],
         'request_day': [cnt_of_day],
+        'request_hour': [cnt_of_hour],
         'app_count': [cnt_of_app],
         'app_avg_per_day': [avg_app_per_day],
         'location_avg_per_day': [avg_location_per_day],
