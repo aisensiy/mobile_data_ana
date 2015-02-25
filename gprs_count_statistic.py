@@ -9,6 +9,11 @@ from csv import DictReader
 from csv import DictWriter
 from collections import Counter
 from constants import log_header
+import os
+import logging
+
+logging.basicConfig(format='%(asctime)s-[%(levelname)s]: %(message)s',
+                    level=logging.DEBUG)
 
 
 field_name = 'start_time'
@@ -36,5 +41,37 @@ def gprs_statistic(fileobj, split_func):
 
 def save_to_csv(fileobj, uid, counter):
     writer = DictWriter(fileobj, fieldnames=['uid', 'time', 'request_count'])
-    for time, count in counter.iteritems():
-        writer.writerow({'uid': uid, 'time': time, 'request_count': count})
+    for split_time, count in counter.iteritems():
+        writer.writerow({'uid': uid, 'time': split_time, 'request_count': count})
+
+
+def get_uid(filepath):
+    return os.path.splitext(os.path.basename(filepath))[0]
+
+
+if __name__ == '__main__':
+    import sys
+    import glob
+    import time
+
+    start = time.time()
+
+    inputdir = sys.argv[1]
+    outputfile = sys.argv[2]
+    split_type = int(sys.argv[3])
+    split_func = split_by_hour if split_type == 1 else split_by_halfhour
+
+    csvfiles = glob.glob(os.path.join(inputdir, '*', '*.csv'))
+    n = len(csvfiles)
+    if os.path.isfile(outputfile):
+        os.remove(outputfile)
+
+    with open(outputfile, 'a') as outputfileobj:
+        for idx, csvfile in enumerate(csvfiles):
+            uid = get_uid(csvfile)
+            with open(csvfile) as f:
+                counter = gprs_statistic(f, split_func)
+            save_to_csv(outputfileobj, uid, counter)
+            logging.info('[%d/%d]' % (idx + 1, n))
+
+    logging.info('finish with time %s', str(time.time() - start))

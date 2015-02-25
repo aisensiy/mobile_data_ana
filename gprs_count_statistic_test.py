@@ -58,6 +58,9 @@ class GcsTestCase(unittest.TestCase):
         self.assertEqual('0001998,0116,3\r\n0001998,0117,17\r\n',
                          fileobj.getvalue())
 
+    def test_get_uid(self):
+        self.assertEqual('0001998', gcs.get_uid('/anb/0001998.csv'))
+
 
 if __name__ == '__main__':
     unittest.main()
