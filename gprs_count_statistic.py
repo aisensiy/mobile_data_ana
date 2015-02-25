@@ -6,6 +6,7 @@
 """
 
 from csv import DictReader
+from csv import DictWriter
 from collections import Counter
 from constants import log_header
 
@@ -31,3 +32,9 @@ def gprs_statistic(fileobj, split_func):
     for row in reader:
         counter[split_func(row[field_name])] += 1
     return counter
+
+
+def save_to_csv(fileobj, uid, counter):
+    writer = DictWriter(fileobj, fieldnames=['uid', 'time', 'request_count'])
+    for time, count in counter.iteritems():
+        writer.writerow({'uid': uid, 'time': time, 'request_count': count})

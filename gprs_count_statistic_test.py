@@ -4,6 +4,7 @@
 import unittest
 import gprs_count_statistic as gcs
 import StringIO
+from collections import Counter
 
 
 class GcsTestCase(unittest.TestCase):
@@ -48,6 +49,14 @@ class GcsTestCase(unittest.TestCase):
         self.assertEqual([('0116', 3), ('0117', 17)],
                          gcs.gprs_statistic(fileobj,
                                             gcs.split_by_halfhour).items())
+
+    def test_save_to_csv(self):
+        fileobj = StringIO.StringIO()
+        counter = Counter({'0116': 3, '0117': 17})
+        uid = '0001998'
+        gcs.save_to_csv(fileobj, uid, counter)
+        self.assertEqual('0001998,0116,3\r\n0001998,0117,17\r\n',
+                         fileobj.getvalue())
 
 
 if __name__ == '__main__':
