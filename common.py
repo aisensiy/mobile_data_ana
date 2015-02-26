@@ -12,6 +12,10 @@ def create_dir_if_not_exists(dst_dir):
         os.mkdir(dst_dir)
 
 
+def get_uid(filepath):
+    return os.path.splitext(os.path.basename(filepath))[0]
+
+
 def add_postfix(filename, postfix):
     filepath, fileext = os.path.splitext(filename)
     return filepath + '.' + postfix + fileext

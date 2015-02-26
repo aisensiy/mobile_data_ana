@@ -11,6 +11,7 @@ from collections import Counter
 from constants import log_header
 import os
 import logging
+from common import get_uid
 
 logging.basicConfig(format='%(asctime)s-[%(levelname)s]: %(message)s',
                     level=logging.DEBUG)
@@ -43,10 +44,6 @@ def save_to_csv(fileobj, uid, counter):
     writer = DictWriter(fileobj, fieldnames=['uid', 'time', 'request_count'])
     for split_time, count in counter.iteritems():
         writer.writerow({'uid': uid, 'time': split_time, 'request_count': count})
-
-
-def get_uid(filepath):
-    return os.path.splitext(os.path.basename(filepath))[0]
 
 
 if __name__ == '__main__':
