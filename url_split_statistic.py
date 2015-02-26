@@ -3,21 +3,15 @@
 
 from csv import DictReader
 from csv import DictWriter
-import json
 from collections import Counter
 import logging
 from common import get_uid
 from url_helper import get_top_domain
 from constants import log_header
+from time_helper import split_by_5_minute
 
 logging.basicConfig(format='%(asctime)s-[%(levelname)s]: %(message)s',
                     level=logging.DEBUG)
-
-
-def split_by_5_minute(time_col):
-    day_hour = time_col[6:10]
-    miniute = int(time_col[10:12]) / 5 * 5
-    return day_hour + ('%02d' % miniute)
 
 
 def encode_domain_counter(counter):
