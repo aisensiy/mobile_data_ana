@@ -2,3 +2,7 @@
 *.swp
 *.csv
 *.txt
+*.json
+*.xlsx
+*.xls
+.ipynb_checkpoints/
