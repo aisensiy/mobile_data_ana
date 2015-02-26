@@ -7,12 +7,6 @@ import StringIO
 
 
 class PulTestCase(unittest.TestCase):
-    def test_get_top_domain(self):
-        self.assertEqual('360.cn', pul.get_top_domain('http://md.openapi.360.cn/list/get'))
-        self.assertEqual('qq.com', pul.get_top_domain('http://short.weixin.qq.com/cgi-bin/micromsg-bin/getcdndns'))
-        self.assertEqual('test.com.cn', pul.get_top_domain('http://inews.test.com.cn/redisTool?type=get&key=downloadNews_158008435%2CdownloadVideo_158008435'))
-        self.assertEqual('127.0.0.1', pul.get_top_domain('http://127.0.0.1/redisTool?type=get&key=downloadNews_158008435%2CdownloadVideo_158008435'))
-
     def test_prepare_user_log(self):
         filedata = """31952300,2,,"4118","28495","116.353472","39.981827","HTTPS","浏览","其他","-9","20131201083010",+0000000000000149.0000,+0000000000000134.0000,+0000000000017334.0000,+0000000000090313.0000,"其他","其他","其它","其它","其它",
 31952300,2,,"4118","28495","116.353472","39.981827","HTTPS","浏览","其他","-9","20131201083643",+0000000000000250.0000,+0000000000000233.0000,+0000000000030305.0000,+0000000000151108.0000,"其他","其他","其它","其它","其它",
@@ -53,10 +47,10 @@ class PulTestCase(unittest.TestCase):
             {'start_time': '20131201112525', 'top_domain': 'qq.com'},
             {'start_time': '20131201112526', 'top_domain': 'qq.com'}
         ]
-        requests = pul.create_user_requests(rows)
+        requests = pul.create_user_requests(rows, 10)
+        pul.print_user_request(requests)
         self.assertEqual(4, len(requests))
         self.assertEqual(5, len(requests[0][2]))
-        pul.print_user_request(requests)
 
 
 if __name__ == '__main__':
