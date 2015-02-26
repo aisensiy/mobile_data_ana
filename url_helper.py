@@ -15,7 +15,7 @@ def get_domain(url):
         return ''
 
 
-def get_top_domain(url):
+def get_domain_by_level(url, level):
     domain = get_domain(url)
     if domain:
         if ip_pn.match(domain):
@@ -23,25 +23,17 @@ def get_top_domain(url):
         splited_domain = domain.split('.')
         if len(splited_domain) >= 2 and \
                 splited_domain[-2] in ['com', 'net', 'info']:
-            top_domain = '.'.join(splited_domain[-3:])
+            top_domain = '.'.join(splited_domain[-(level + 2):])
         else:
-            top_domain = '.'.join(splited_domain[-2:])
+            top_domain = '.'.join(splited_domain[-(level + 1):])
         return top_domain
     else:
         return ''
 
 
+def get_top_domain(url):
+    return get_domain_by_level(url, 1)
+
+
 def get_second_domain(url):
-    domain = get_domain(url)
-    if domain:
-        if ip_pn.match(domain):
-            return domain
-        splited_domain = domain.split('.')
-        if len(splited_domain) >= 2 and \
-                splited_domain[-2] in ['com', 'net', 'info']:
-            level_domain = '.'.join(splited_domain[-4:])
-        else:
-            level_domain = '.'.join(splited_domain[-3:])
-        return level_domain
-    else:
-        return ''
+    return get_domain_by_level(url, 2)
