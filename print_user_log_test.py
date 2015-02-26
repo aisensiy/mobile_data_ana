@@ -2,23 +2,12 @@
 # encoding: utf-8
 
 import unittest
-import gprs_count_statistic as gcs
+import print_user_log as pul
 import StringIO
-from collections import Counter
 
 
-class GcsTestCase(unittest.TestCase):
-    def test_split_by_hour(self):
-        self.assertEqual('0112', gcs.split_by_hour('20131201122222'))
-        self.assertEqual('0100', gcs.split_by_hour('20131201002222'))
-
-    def test_split_by_halfhour(self):
-        self.assertEqual('0100', gcs.split_by_halfhour('20131201002222'))
-        self.assertEqual('0124', gcs.split_by_halfhour('20131201122222'))
-        self.assertEqual('0125', gcs.split_by_halfhour('20131201124222'))
-        self.assertEqual('0147', gcs.split_by_halfhour('20131201234222'))
-
-    def test_gprs_statistic(self):
+class PulTestCase(unittest.TestCase):
+    def test_prepare_user_log(self):
         filedata = """31952300,2,,"4118","28495","116.353472","39.981827","HTTPS","浏览","其他","-9","20131201083010",+0000000000000149.0000,+0000000000000134.0000,+0000000000017334.0000,+0000000000090313.0000,"其他","其他","其它","其它","其它",
 31952300,2,,"4118","28495","116.353472","39.981827","HTTPS","浏览","其他","-9","20131201083643",+0000000000000250.0000,+0000000000000233.0000,+0000000000030305.0000,+0000000000151108.0000,"其他","其他","其它","其它","其它",
 31952300,2,,"4118","28495","116.353472","39.981827","QQLive","视频","QQLive","视频","20131201083934",+0000000000000009.0000,+0000000000000006.0000,+0000000000001632.0000,+0000000000000603.0000,"腾讯网","信息采集","即时聊天类","题材","即时聊天公共网站资源","http://monitor.uu.qq.com/analytics/upload"
@@ -42,21 +31,26 @@ class GcsTestCase(unittest.TestCase):
         """
         filedata = filedata.strip()
         fileobj = StringIO.StringIO(filedata)
-        self.assertEqual([('0108', 20)],
-                         gcs.gprs_statistic(fileobj,
-                                            gcs.split_by_hour).items())
-        fileobj = StringIO.StringIO(filedata)
-        self.assertEqual([('0116', 3), ('0117', 17)],
-                         gcs.gprs_statistic(fileobj,
-                                            gcs.split_by_halfhour).items())
+        rows = pul.prepare_user_log(fileobj)
+        self.assertEqual(20, len(rows))
 
-    def test_save_to_csv(self):
-        fileobj = StringIO.StringIO()
-        counter = Counter({'0116': 3, '0117': 17})
-        uid = '0001998'
-        gcs.save_to_csv(fileobj, uid, counter)
-        self.assertEqual('0001998,0116,3\r\n0001998,0117,17\r\n',
-                         fileobj.getvalue())
+    def test_create_user_request(self):
+        rows = [
+            {'start_time': '20131201112323', 'top_domain': 'qq.com'},
+            {'start_time': '20131201112324', 'top_domain': 'qq.com'},
+            {'start_time': '20131201112324', 'top_domain': 'qq.com'},
+            {'start_time': '20131201112324', 'top_domain': 'qq.com'},
+            {'start_time': '20131201112328', 'top_domain': 'qq.com'},
+            {'start_time': '20131201112423', 'top_domain': 'qq.com'},
+            {'start_time': '20131201112424', 'top_domain': 'qq.com'},
+            {'start_time': '20131201112424', 'top_domain': 'baidu.com'},
+            {'start_time': '20131201112525', 'top_domain': 'qq.com'},
+            {'start_time': '20131201112526', 'top_domain': 'qq.com'}
+        ]
+        requests = pul.create_user_requests(rows, 10)
+        pul.print_user_request(requests)
+        self.assertEqual(4, len(requests))
+        self.assertEqual(5, len(requests[0][2]))
 
 
 if __name__ == '__main__':

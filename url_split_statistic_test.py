@@ -2,23 +2,13 @@
 # encoding: utf-8
 
 import unittest
-import gprs_count_statistic as gcs
-import StringIO
+import url_split_statistic as uss
 from collections import Counter
+import StringIO
 
 
-class GcsTestCase(unittest.TestCase):
-    def test_split_by_hour(self):
-        self.assertEqual('0112', gcs.split_by_hour('20131201122222'))
-        self.assertEqual('0100', gcs.split_by_hour('20131201002222'))
-
-    def test_split_by_halfhour(self):
-        self.assertEqual('0100', gcs.split_by_halfhour('20131201002222'))
-        self.assertEqual('0124', gcs.split_by_halfhour('20131201122222'))
-        self.assertEqual('0125', gcs.split_by_halfhour('20131201124222'))
-        self.assertEqual('0147', gcs.split_by_halfhour('20131201234222'))
-
-    def test_gprs_statistic(self):
+class UssTestCase(unittest.TestCase):
+    def test_domain_count_statistic(self):
         filedata = """31952300,2,,"4118","28495","116.353472","39.981827","HTTPS","浏览","其他","-9","20131201083010",+0000000000000149.0000,+0000000000000134.0000,+0000000000017334.0000,+0000000000090313.0000,"其他","其他","其它","其它","其它",
 31952300,2,,"4118","28495","116.353472","39.981827","HTTPS","浏览","其他","-9","20131201083643",+0000000000000250.0000,+0000000000000233.0000,+0000000000030305.0000,+0000000000151108.0000,"其他","其他","其它","其它","其它",
 31952300,2,,"4118","28495","116.353472","39.981827","QQLive","视频","QQLive","视频","20131201083934",+0000000000000009.0000,+0000000000000006.0000,+0000000000001632.0000,+0000000000000603.0000,"腾讯网","信息采集","即时聊天类","题材","即时聊天公共网站资源","http://monitor.uu.qq.com/analytics/upload"
@@ -42,21 +32,17 @@ class GcsTestCase(unittest.TestCase):
         """
         filedata = filedata.strip()
         fileobj = StringIO.StringIO(filedata)
-        self.assertEqual([('0108', 20)],
-                         gcs.gprs_statistic(fileobj,
-                                            gcs.split_by_hour).items())
-        fileobj = StringIO.StringIO(filedata)
-        self.assertEqual([('0116', 3), ('0117', 17)],
-                         gcs.gprs_statistic(fileobj,
-                                            gcs.split_by_halfhour).items())
+        result = uss.domain_count_statistic(fileobj, uss.split_by_5_minute)
+        self.assertEqual([('010825', 'qq.com:3'), ('010835', 'qlogo.cn:9|qq.com:3'), ('010840', 'qq.com:3')], result)
 
     def test_save_to_csv(self):
+        counter = [('010825', 'qq.com:3'), ('010835', 'qlogo.cn:9|qq.com:3'), ('010840', 'qq.com:3')]
         fileobj = StringIO.StringIO()
-        counter = Counter({'0116': 3, '0117': 17})
         uid = '0001998'
-        gcs.save_to_csv(fileobj, uid, counter)
-        self.assertEqual('0001998,0116,3\r\n0001998,0117,17\r\n',
-                         fileobj.getvalue())
+
+        uss.save_to_csv(fileobj, uid, counter)
+
+        self.assertEqual('0001998,010825,qq.com:3\r\n0001998,010835,qlogo.cn:9|qq.com:3\r\n0001998,010840,qq.com:3\r\n', fileobj.getvalue())
 
 
 if __name__ == '__main__':
