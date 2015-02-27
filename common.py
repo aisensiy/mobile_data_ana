@@ -5,6 +5,15 @@ import os
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import StringIO
+
+
+def load_file(redis_server, filepath):
+    value = redis_server.get(filepath)
+    if value:
+        return StringIO.StringIO(value)
+    else:
+        return open(filepath, buffering=(2 << 25))
 
 
 def create_dir_if_not_exists(dst_dir):
