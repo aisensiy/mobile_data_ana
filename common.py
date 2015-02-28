@@ -11,6 +11,7 @@ import StringIO
 def load_file(redis_server, filepath):
     value = redis_server.get(filepath)
     if value:
+        print 'In redis!'
         return StringIO.StringIO(value)
     else:
         return open(filepath, buffering=(2 << 25))
