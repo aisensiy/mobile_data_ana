@@ -11,8 +11,41 @@ logging.basicConfig(format='%(asctime)s-[%(levelname)s]: %(message)s',
                     level=logging.DEBUG)
 
 
-def import_app_domain_table(engine, df, tablename):
-    pass
+def import_app_domain_table(engine, filepath, tablename, chunksize=10000):
+    cols = ['busi_name', 'busi_type_name', 'app_name', 'app_type_name',
+            'site_name', 'site_channel_name', 'cont_app_id',
+            'cont_classify_id', 'cont_type_id']
+    cols = ['uid', 'minute'] + cols + ['domain', 'count']
+    df = pd.read_csv(filepath,
+                     names=cols,
+                     dtype={'uid': str, 'minute': str},
+                     chunksize=chunksize)
+
+    for dataframe in df:
+        dataframe['day'] = dataframe.minute.map(lambda x: x[:2])
+        import_to_db(engine, dataframe, tablename)
+        logging.info('a chunk')
+
+
+def create_app_domain_table(tablename, engine):
+    meta = MetaData(bind=engine)
+    Table(tablename, meta,
+          Column('id', Integer, primary_key=True, autoincrement=True),
+          Column('uid', String(16), nullable=False),
+          Column('day', String(2)),
+          Column('minute', String(6)),
+          Column('busi_name', String(255)),
+          Column('busi_type_name', String(255)),
+          Column('app_name', String(255)),
+          Column('app_type_name', String(255)),
+          Column('site_name', String(255)),
+          Column('site_channel_name', String(255)),
+          Column('cont_app_id', String(255)),
+          Column('cont_classify_id', String(255)),
+          Column('cont_type_id', String(255)),
+          Column('domain', String(255)),
+          Column('count', Integer))
+    meta.create_all(engine)
 
 
 def import_gprs_hour_stat_table(engine, filepath, tablename, chunksize=10000):
@@ -87,5 +120,8 @@ if __name__ == '__main__':
     elif tabletype == 'gprs_hour_count':
         create_grps_hour_stat_table(tablename, engine)
         import_gprs_hour_stat_table(engine, filepath, tablename)
+    elif tabletype == 'app_domain':
+        create_app_domain_table(tablename, engine)
+        import_app_domain_table(engine, filepath, tablename)
 
     logging.info('finish with time %s', str(time.time() - start))
