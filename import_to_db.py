@@ -21,6 +21,9 @@ def import_app_domain_table(engine, filepath, tablename, chunksize=10000):
                      dtype={'uid': str, 'minute': str},
                      chunksize=chunksize)
 
+    for col in cols:
+        df[col] = df[col].str.encode('utf8')
+
     for dataframe in df:
         dataframe['day'] = dataframe.minute.map(lambda x: x[:2])
         import_to_db(engine, dataframe, tablename)
