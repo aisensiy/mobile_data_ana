@@ -21,9 +21,6 @@ def import_app_domain_table(engine, filepath, tablename, chunksize=10000):
                      dtype={'uid': str, 'minute': str},
                      chunksize=chunksize)
 
-    for col in cols:
-        df[col] = df[col].str.encode('utf8')
-
     for dataframe in df:
         dataframe['day'] = dataframe.minute.map(lambda x: x[:2])
         import_to_db(engine, dataframe, tablename)
@@ -47,7 +44,8 @@ def create_app_domain_table(tablename, engine):
           Column('cont_classify_id', String(255)),
           Column('cont_type_id', String(255)),
           Column('domain', String(255)),
-          Column('count', Integer))
+          Column('count', Integer),
+          mysql_charset='utf8')
     meta.create_all(engine)
 
 
@@ -93,6 +91,8 @@ def import_location_table(engine, filepath, tablename, chunksize=10000):
                      dtype={'uid': str, 'start_time': str},
                      chunksize=chunksize)
     for dataframe in df:
+        # for col in cols:
+        #     dataframe[col] = dataframe[col].str.decode('utf8')
         import_to_db(engine, dataframe, tablename)
         logging.info('a chunk')
 
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     dbstring = sys.argv[4]
 
     # "mysql://root:000000@localhost/mobile_data_development"
-    engine = sqlalchemy.create_engine(dbstring)
+    engine = sqlalchemy.create_engine(dbstring, encoding='utf-8')
 
     logging.info('import %s to %s', filepath, tablename)
     if tabletype == 'location':
