@@ -2,13 +2,55 @@
 # encoding: utf-8
 
 import sqlalchemy
-from sqlalchemy import MetaData, String, Integer, Table, Column
+from sqlalchemy import MetaData, String, Integer, Table, Column, Float
 import pandas as pd
 import logging
 
 
 logging.basicConfig(format='%(asctime)s-[%(levelname)s]: %(message)s',
                     level=logging.DEBUG)
+
+
+def create_user_table(tablename, engine):
+    meta = MetaData(bind=engine)
+    Table(tablename, meta,
+          Column('id', Integer, primary_key=True, autoincrement=True),
+          Column('uid', String(16), nullable=False),
+          Column('gender', String(4)),
+          Column('age', Integer),
+          Column('education_name', String(255)),
+          Column('user_opentime', String(255)),
+          Column('brand_name', String(255)),
+          Column('call_duration_m', Integer),
+          Column('gprs_flow', Float),
+          Column('call_fee', Float),
+          Column('gprs_fee', Float),
+          Column('databusiness_fee', Float),
+          Column('brand_chn', String(255)),
+          Column('model_chn', String(255)),
+          Column('screensize', Float),
+          Column('operation_sys', String(255)),
+          Column('terminal_price', Float),
+          Column('dept_country_name', String(255)),
+          Column('dept_name', String(255)),
+          mysql_charset='utf8')
+    meta.create_all(engine)
+
+
+def import_user_table(engine, filepath, tablename, chunksize=10000):
+    cols = ['uid', 'gender', 'age', 'education_name',
+            'user_opentime', 'brand_name', 'call_duration_m',
+            'gprs_flow', 'call_fee', 'gprs_fee', 'databusiness_fee',
+            'brand_chn', 'model_chn', 'screensize', 'operation_sys',
+            'terminal_price', 'dept_country_name', 'dept_name']
+    df = pd.read_csv(filepath,
+                     names=cols,
+                     dtype={'uid': str, 'user_opentime': str},
+                     chunksize=chunksize)
+
+    for dataframe in df:
+        import_to_db(engine, dataframe, tablename)
+        logging.info('a chunk')
 
 
 def import_app_domain_table(engine, filepath, tablename, chunksize=10000):
@@ -126,5 +168,8 @@ if __name__ == '__main__':
     elif tabletype == 'app_domain':
         create_app_domain_table(tablename, engine)
         import_app_domain_table(engine, filepath, tablename)
+    elif tabletype == 'user':
+        create_user_table(tablename, engine)
+        import_user_table(engine, filepath, tablename)
 
     logging.info('finish with time %s', str(time.time() - start))
