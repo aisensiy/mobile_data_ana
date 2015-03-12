@@ -2,13 +2,40 @@
 # encoding: utf-8
 
 import sqlalchemy
-from sqlalchemy import MetaData, String, Integer, Table, Column, Float
+from sqlalchemy import MetaData, String, Integer, Table, Column, Float, DateTime
 import pandas as pd
 import logging
 
 
 logging.basicConfig(format='%(asctime)s-[%(levelname)s]: %(message)s',
                     level=logging.DEBUG)
+
+
+def create_phonecall_table(tablename, engine):
+    meta = MetaData(bind=engine)
+    Table(tablename, meta,
+          Column('id', Integer, primary_key=True, autoincrement=True),
+          Column('uid', String(16), nullable=False),
+          Column('start_time', DateTime),
+          Column('end_time', DateTime),
+          Column('location', String(18)),
+          mysql_charset='utf8')
+    meta.create_all(engine)
+
+
+def import_phonecall_table(engine, filepath, tablename, chunksize=10000):
+    cols = ['uid', 'start_time', 'end_time', 'lng', 'lat']
+    df = pd.read_csv(filepath,
+                     names=cols,
+                     dtype={'uid': str, 'lng': str, 'lat': str},
+                     chunksize=chunksize)
+
+    for dataframe in df:
+        dataframe['location'] = dataframe.lng + ' ' + dataframe.lat
+        del dataframe['lng']
+        del dataframe['lat']
+        import_to_db(engine, dataframe, tablename)
+        logging.info('a chunk')
 
 
 def create_user_table(tablename, engine):
@@ -171,5 +198,8 @@ if __name__ == '__main__':
     elif tabletype == 'user':
         create_user_table(tablename, engine)
         import_user_table(engine, filepath, tablename)
+    elif tabletype == 'call':
+        create_phonecall_table(tablename, engine)
+        import_phonecall_table(engine, filepath, tablename)
 
     logging.info('finish with time %s', str(time.time() - start))
