@@ -2,13 +2,34 @@
 # encoding: utf-8
 
 import sqlalchemy
-from sqlalchemy import MetaData, String, Integer, Table, Column, Float, DateTime
+from sqlalchemy import MetaData, String, Integer, Table, Column, Float, DateTime, Text
 import pandas as pd
 import logging
 
 
 logging.basicConfig(format='%(asctime)s-[%(levelname)s]: %(message)s',
                     level=logging.DEBUG)
+
+def create_location_desc_table(tablename, engine):
+    meta = MetaData(bind=engine)
+    Table(tablename, meta,
+          Column('id', Integer, primary_key=True, autoincrement=True),
+          Column('location', String(18)),
+          Column('desc', String(255)),
+          Column('info', Text),
+          mysql_charset='utf8')
+    meta.create_all(engine)
+
+
+def import_location_desc_table(engine, filepath, tablename, chunksize=10000):
+    cols = ['location', 'desc', 'info']
+    df = pd.read_csv(filepath,
+                     names=cols,
+                     chunksize=chunksize)
+
+    for dataframe in df:
+        import_to_db(engine, dataframe, tablename)
+        logging.info('a chunk')
 
 
 def create_phonecall_table(tablename, engine):
@@ -201,5 +222,8 @@ if __name__ == '__main__':
     elif tabletype == 'call':
         create_phonecall_table(tablename, engine)
         import_phonecall_table(engine, filepath, tablename)
+    elif tabletype == 'location_desc':
+        create_location_desc_table(tablename, engine)
+        import_location_desc_table(engine, filepath, tablename)
 
     logging.info('finish with time %s', str(time.time() - start))
