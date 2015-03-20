@@ -16,6 +16,7 @@ import json
 logging.basicConfig(format='%(asctime)s-[%(levelname)s]: %(message)s',
                     level=logging.INFO)
 
+AMAP_AK = '9766a3eb630eefe222a8a4ca392edc11'
 
 def cal_offset(latitude, longitude):
     return float(latitude), float(longitude)
@@ -32,7 +33,7 @@ def fetch_json_data(url):
 
 def generate_url(latitude, longitude):
     latitude, longitude = cal_offset(latitude, longitude)
-    return 'http://api.map.baidu.com/geoconv/v1/?coords=%f,%f&from=1&to=5&ak=%s' % (longitude, latitude, BAIDU_MAP_AK)
+    return 'http://restapi.amap.com/v3/assistant/coordinate/convert?locations=%f,%f&coordsys=gps&key=%s' % (longitude, latitude, AMAP_AK)
 
 
 def main(src_file_path, dst_file_path, log_file_path):
@@ -41,7 +42,7 @@ def main(src_file_path, dst_file_path, log_file_path):
     logfile = open(log_file_path, 'w')
     with open(src_file_path, 'rb') as f:
         for line in f:
-            longitude, latitude = line.split(',')[0].split(' ')
+            longitude, latitude = line.strip().split(',')[0].split(' ')
             logging.info('fetching %s %s', latitude, longitude)
             url = generate_url(latitude, longitude)
             result = fetch_json_data(url)
@@ -49,8 +50,7 @@ def main(src_file_path, dst_file_path, log_file_path):
                 logfile.write("%s %s failed\n" % (latitude, longitude))
             else:
                 result = json.loads(result)
-                lg = result['result'][0]['x']
-                la = result['result'][0]['y']
+                lg, la = result['locations'].split(',')
                 writer.writerow([latitude + ' ' + longitude, '%s %s' % (str(la), str(lg))])
     ofile.close()
     logfile.close()

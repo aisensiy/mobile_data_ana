@@ -15,6 +15,7 @@ import logging
 logging.basicConfig(format='%(asctime)s-[%(levelname)s]: %(message)s',
                     level=logging.INFO)
 
+AMAP_AK = '1a5c06ac68808528c59603cb03ff529e'
 
 def cal_offset(latitude, longitude):
     return float(latitude), float(longitude)
@@ -31,7 +32,7 @@ def fetch_json_data(url):
 
 def generate_url(latitude, longitude):
     latitude, longitude = cal_offset(latitude, longitude)
-    return 'http://api.map.baidu.com/geocoder/v2/?ak=%s&location=%f,%f&output=json&pois=1' % (BAIDU_MAP_AK, latitude, longitude)
+    return 'http://restapi.amap.com/v3/geocode/regeo?location=%f,%f&key=%s&s=rsv3&radius=500&extensions=all' % (longitude, latitude, AMAP_AK)
 
 
 def main(src_file_path, dst_file_path, log_file_path):
@@ -41,8 +42,8 @@ def main(src_file_path, dst_file_path, log_file_path):
     with open(src_file_path, 'rb') as f:
         for line in f:
             latitude, longitude = line.strip().split(',')[-1].split(' ')
-            logging.info('fetching %s %s', latitude, longitude)
             url = generate_url(latitude, longitude)
+            logging.info(url)
             result = fetch_json_data(url)
             if not result:
                 logfile.write("%s %s failed\n" % (latitude, longitude))
