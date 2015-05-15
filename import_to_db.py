@@ -15,19 +15,28 @@ def create_location_desc_table(tablename, engine):
     Table(tablename, meta,
           Column('id', Integer, primary_key=True, autoincrement=True),
           Column('location', String(18)),
-          Column('desc', String(255)),
-          Column('info', Text),
+          Column('station_desc', String(255)),
+          Column('converted_location', String(255)),
+          Column('tags', Text),
+          Column('addr', String(255)),
+          Column('business', String(255)),
+          Column('district', String(255)),
           mysql_charset='utf8')
     meta.create_all(engine)
 
 
 def import_location_desc_table(engine, filepath, tablename, chunksize=10000):
-    cols = ['location', 'desc', 'info']
+    cols = ['location', 'station_desc', 'converted_location', 'tags', 'addr', 'business', 'district']
     df = pd.read_csv(filepath,
                      names=cols,
                      chunksize=chunksize)
 
     for dataframe in df:
+        def format_location(location):
+            locations = location.split(' ')
+            return '%.5f %.5f' % (float(locations[0]), float(locations[1]))
+
+        dataframe['location'] = dataframe.location.map(format_location)
         import_to_db(engine, dataframe, tablename)
         logging.info('a chunk')
 

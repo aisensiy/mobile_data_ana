@@ -21,7 +21,7 @@ def prepare_user_log(fileobj):
         rows.append(row)
 
     rows.sort(key=lambda x: (x['start_time'], x['top_domain']))
-    return map(lambda x: {'start_time': x['start_time'], 'top_domain': x['top_domain']}, rows)
+    return map(lambda x: {'start_time': x['start_time'], 'top_domain': x['top_domain'], 'url': x['acce_url']}, rows)
 
 
 def string_to_datetime(string):
